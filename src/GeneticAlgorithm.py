@@ -2,15 +2,13 @@ import random
 import numpy as np
 from TSPData import TSPData
 
-# TSP problem solver using genetic algorithms.
 class GeneticAlgorithm:
 
-    # Constructs a new 'genetic algorithm' object.
-    # @param generations the amount of generations.
-    # @param popSize the population size.
-    def __init__(self, generations, pop_size):
+    def __init__(self, generations, pop_size, elite, mutation_rate):
         self.generations = generations
         self.pop_size = pop_size
+        self.elite = elite
+        self.mutation_rate = mutation_rate
 
         # This method should solve the TSP.
         # @param pd the TSP data.
@@ -37,84 +35,94 @@ class GeneticAlgorithm:
             population.append(random.sample(range(self.city_count), self.city_count))
         return population
 
-        # Returns the fitness of a route. Fitness is the inverse of the route length.
 
-    def _fitness(self, route):
-        length = self._get_route_distance(route)
-        if length == 0:
-            return float('inf')
-        return 1.0 / length
-
-        # Returns the length of a route.
-
-    def _route_length(self, route):
-        length = 0.0
-        for i in range(self.city_count):
-            j = (i + 1) % self.city_count
-            #city_i = self.tsp_data.distances[route[i]][route[j]]
-            #city_j = self.tsp_data.distances[route[j]]
-            #print(city_j)
-            #length += self._distance(city_i, city_j)
-            length += self.tsp_data.distances[route[i]][route[j]]
-        return length
-
-        # Calculates the Euclidean distance between two cities.
-
+    # Calculates the Euclidean distance between two cities.
     def _distance(self, city_a, city_b):
         return np.linalg.norm(city_a - city_b)
 
         # Generates the next generation.
 
     def _next_generation(self):
-        new_population = []
-        for i in range(self.pop_size):
+        # Keep the top performing route from the previous generation
+        elite_count = int(self.elite * self.pop_size)
+        elites = self._get_elites(elite_count)
+
+        # Generate new population
+        new_population = elites
+        for i in range(self.pop_size - elite_count):
             parent_a = self._select_parent()
             parent_b = self._select_parent()
-            child = self._crossover(parent_a, parent_b)
+            child, child2 = self._crossover(parent_a, parent_b)
+
+            # Apply mutation to some children
+            if random.random() < self.mutation_rate:
+                child = self._mutate(child)
+            if random.random() < self.mutation_rate:
+                child2 = self._mutate(child2)
+
             new_population.append(child)
-            #new_population.append(child2)
+            new_population.append(child2)
+
+        # Select the best route from the current population
+        best_route, _ = self._get_best_route()
+        new_population[0] = best_route
+
+        # Update the population
         self.population = new_population
 
-        # Selects a parent for breeding.
+    # Selects the top performing routes from the population.
+    def _get_elites(self, elite_count):
+        routes = [(route, self._get_route_distance(route)) for route in self.population]
+        routes.sort(key=lambda x: x[1])
+        elites = [route[0] for route in routes[:elite_count]]
+        return elites
 
+
+    # Selects a parent for breeding.
     def _select_parent(self):
-        probabilities = []
-        for citizen in self.population:
-            probabilities.append(1 - self._fitness(citizen))
-        norm = np.linalg.norm(probabilities)
-        index = np.arange(0, self.pop_size)
-        vector = probabilities/norm if norm != 0 else probabilities
-        chosen = random.choices(index, (probabilities / norm))
-        return self.population[chosen[0]]
+        return random.choice(self.population)
 
-        # Performs crossover between two parents.
-
-    def _crossover(self, parent_a, parent_b):
-        # Perform crossover with 2-point crossover
-        cut1 = random.randint(0, self.city_count)
-        cut2 = random.randint(cut1, self.city_count)
-
-        # Create a child
-        child = parent_b
-        #child2 = [-1] * self.city_count
-        #child2 = parent_a
-
-        # Copy the middle segment from parent A
-        child[cut1:cut2] = parent_a[cut1:cut2]
-
-        #child2[cut1:cut2 + 1] = parent_b[cut1:cut2]
-
-        # Fill the remaining positions with cities from parent B, in order
-        p_b_index = 0
-        #for i in range(self.city_count):
-        #    if child[i] == -1:
-        #        while parent_b[p_b_index] in child:
-        #            p_b_index += 1
-        #        child[i] = parent_b[p_b_index]
-        #        p_b_index += 1
-        print("Child: ", child)
+    def _mutate(self, child):
+        for i in range(len(child)):
+            if random.random() < self.mutation_rate:
+                j = random.randint(0, len(child) - 1)
+                child[i], child[j] = child[j], child[i]
         return child
 
+    # Performs crossover between two parents.
+    def _crossover(self, parent_a, parent_b):
+        # Initialize empty child routes
+        child = [-1] * self.city_count
+        child2 = [-1] * self.city_count
+
+        # Randomly select a segment of the first parent and copy it to the corresponding segment of one child
+        start_pos = random.randint(0, self.city_count - 1)
+        end_pos = random.randint(0, self.city_count - 1)
+
+        if start_pos > end_pos:
+            start_pos, end_pos = end_pos, start_pos
+
+        for i in range(start_pos, end_pos + 1):
+            child[i] = parent_a[i]
+            child2[i] = parent_b[i]
+
+        # Fill in the remaining cities from the second parent in the order in which they appear in the second parent,
+        # skipping any cities that have already been included in the segment copied from the first parent
+        for i in range(self.city_count):
+            if parent_b[i] not in child:
+                for j in range(self.city_count):
+                    if child[j] == -1:
+                        child[j] = parent_b[i]
+                        break
+
+        for i in range(self.city_count):
+            if parent_a[i] not in child2:
+                for j in range(self.city_count):
+                    if child2[j] == -1:
+                        child2[j] = parent_a[i]
+                        break
+
+        return child, child2
     def _get_best_route(self):
         best_route = None
         best_distance = float('inf')
