@@ -1,4 +1,5 @@
 import random
+import numpy as np
 from TSPData import TSPData
 
 # TSP problem solver using genetic algorithms.
@@ -58,7 +59,7 @@ class GeneticAlgorithm:
         # Calculates the Euclidean distance between two cities.
 
     def _distance(self, city_a, city_b):
-        return ((city_a[0] - city_b[0]) ** 2 + (city_a[1] - city_b[1]) ** 2) ** 0.5
+        return np.linalg.norm(city_a - city_b)
 
         # Generates the next generation.
 
@@ -67,8 +68,9 @@ class GeneticAlgorithm:
         for i in range(self.pop_size):
             parent_a = self._select_parent()
             parent_b = self._select_parent()
-            child = self._crossover(parent_a, parent_b)
+            child, child2 = self._crossover(parent_a, parent_b)
             new_population.append(child)
+            new_population.append(child2)
         self.population = new_population
 
         # Selects a parent for breeding.
@@ -84,21 +86,25 @@ class GeneticAlgorithm:
         cut2 = random.randint(cut1, self.city_count - 1)
 
         # Create a child
-        child = [-1] * self.city_count
+        child = parent_b
+        #child2 = [-1] * self.city_count
+        child2 = parent_a
 
         # Copy the middle segment from parent A
         child[cut1:cut2 + 1] = parent_a[cut1:cut2 + 1]
 
+        child2[cut1:cut2 + 1] = parent_b[cut1:cut2 + 1]
+
         # Fill the remaining positions with cities from parent B, in order
         p_b_index = 0
-        for i in range(self.city_count):
-            if child[i] == -1:
-                while parent_b[p_b_index] in child:
-                    p_b_index += 1
-                child[i] = parent_b[p_b_index]
-                p_b_index += 1
+        #for i in range(self.city_count):
+        #    if child[i] == -1:
+        #        while parent_b[p_b_index] in child:
+        #            p_b_index += 1
+        #        child[i] = parent_b[p_b_index]
+        #        p_b_index += 1
 
-        return child
+        return child, child2
 
     def _get_best_route(self):
         best_route = None
