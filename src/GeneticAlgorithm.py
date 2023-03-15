@@ -51,9 +51,11 @@ class GeneticAlgorithm:
         length = 0.0
         for i in range(self.city_count):
             j = (i + 1) % self.city_count
-            city_i = self.tsp_data[route[i]]
-            city_j = self.tsp_data[route[j]]
-            length += self._distance(city_i, city_j)
+            #city_i = self.tsp_data.distances[route[i]][route[j]]
+            #city_j = self.tsp_data.distances[route[j]]
+            #print(city_j)
+            #length += self._distance(city_i, city_j)
+            length += self.tsp_data.distances[route[i]][route[j]]
         return length
 
         # Calculates the Euclidean distance between two cities.
@@ -76,13 +78,17 @@ class GeneticAlgorithm:
         # Selects a parent for breeding.
 
     def _select_parent(self):
-        return random.choice(self.population)
+        probabilities = []
+        for citizen in self.population:
+            probabilities.append(1 - self._fitness(citizen))
+        norm = np.linalg.norm(probabilities)
+        return random.choice(self.population, probabilities / norm)
 
         # Performs crossover between two parents.
 
     def _crossover(self, parent_a, parent_b):
         # Perform crossover with 2-point crossover
-        cut1 = random.randint(0, self.city_count - 1)
+        cut1 = random.randint(0, self.city_count - 2)
         cut2 = random.randint(cut1, self.city_count - 1)
 
         # Create a child
@@ -91,9 +97,9 @@ class GeneticAlgorithm:
         child2 = parent_a
 
         # Copy the middle segment from parent A
-        child[cut1:cut2 + 1] = parent_a[cut1:cut2 + 1]
+        child[cut1:cut2 + 1] = parent_a[cut1:cut2]
 
-        child2[cut1:cut2 + 1] = parent_b[cut1:cut2 + 1]
+        child2[cut1:cut2 + 1] = parent_b[cut1:cut2]
 
         # Fill the remaining positions with cities from parent B, in order
         p_b_index = 0
