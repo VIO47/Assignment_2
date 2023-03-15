@@ -40,7 +40,7 @@ class GeneticAlgorithm:
         # Returns the fitness of a route. Fitness is the inverse of the route length.
 
     def _fitness(self, route):
-        length = self._route_length(route)
+        length = self._get_route_distance(route)
         if length == 0:
             return float('inf')
         return 1.0 / length
@@ -70,9 +70,9 @@ class GeneticAlgorithm:
         for i in range(self.pop_size):
             parent_a = self._select_parent()
             parent_b = self._select_parent()
-            child, child2 = self._crossover(parent_a, parent_b)
+            child = self._crossover(parent_a, parent_b)
             new_population.append(child)
-            new_population.append(child2)
+            #new_population.append(child2)
         self.population = new_population
 
         # Selects a parent for breeding.
@@ -82,7 +82,10 @@ class GeneticAlgorithm:
         for citizen in self.population:
             probabilities.append(1 - self._fitness(citizen))
         norm = np.linalg.norm(probabilities)
-        return random.choice(self.population, probabilities / norm)
+        index = np.arange(0, self.pop_size)
+        vector = probabilities/norm if norm != 0 else probabilities
+        chosen = random.choices(index, (probabilities / norm))
+        return self.population[chosen[0]]
 
         # Performs crossover between two parents.
 
@@ -94,12 +97,12 @@ class GeneticAlgorithm:
         # Create a child
         child = parent_b
         #child2 = [-1] * self.city_count
-        child2 = parent_a
+        #child2 = parent_a
 
         # Copy the middle segment from parent A
         child[cut1:cut2 + 1] = parent_a[cut1:cut2]
 
-        child2[cut1:cut2 + 1] = parent_b[cut1:cut2]
+        #child2[cut1:cut2 + 1] = parent_b[cut1:cut2]
 
         # Fill the remaining positions with cities from parent B, in order
         p_b_index = 0
@@ -110,7 +113,7 @@ class GeneticAlgorithm:
         #        child[i] = parent_b[p_b_index]
         #        p_b_index += 1
 
-        return child, child2
+        return child
 
     def _get_best_route(self):
         best_route = None
