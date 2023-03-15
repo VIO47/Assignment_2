@@ -20,11 +20,11 @@ class Maze:
     # Initialize pheromones to a start value.
     def initialize_pheromones(self, q):
         self.pheromones = []
-        for x in range(self.length):
+        for x in range(self.width):
             self.pheromones.append([])
         
-        for x in range(self.length):
-            for y in range(self.width):
+        for y in range(self.length):
+            for x in range(self.width):
                 if self.walls[x][y] == 1:
                     self.pheromones[x].append(q)
                 else:
@@ -64,8 +64,8 @@ class Maze:
     # Evaporate pheromone
     # @param rho evaporation factor
     def evaporate(self, rho):
-        for i in range(self.length):
-            for j in range(self.width):
+        for i in range(len(self.pheromones)):
+            for j in range(len(self.pheromones[0])):
                 self.pheromones[i][j] *= (1 - rho)
 
     # Width getter
@@ -88,11 +88,11 @@ class Maze:
 
         if(i > 0 and self.walls[i - 1][j] == 1):
             sum_pheromones += self.pheromones[i - 1][j]
-        if(i < self.length - 1 and self.walls[i + 1][j] == 1):
+        if(i < self.width - 1 and self.walls[i + 1][j] == 1):
             sum_pheromones += self.pheromones[i + 1][j]
         if(j > 0 and self.walls[i][j - 1] == 1):
             sum_pheromones += self.pheromones[i][j - 1]
-        if(j < self.width - 1 and self.walls[i][j + 1] == 1):
+        if(j < self.length - 1 and self.walls[i][j + 1] == 1):
             sum_pheromones += self.pheromones[i][j + 1]
 
         return sum_pheromones

@@ -27,35 +27,35 @@ class Ant:
 
         while (current.__eq__(self.end) == False) and (it < iterations):
             sum_denominator = 0
-            up = Coordinate(i - 1, j)
-            right = Coordinate(i, j + 1)
-            down = Coordinate(i + 1, j)
-            left = Coordinate(i, j - 1)
+            left = Coordinate(i - 1, j)
+            up = Coordinate(i, j + 1)
+            right = Coordinate(i + 1, j)
+            down = Coordinate(i, j - 1)
             prob_north = 0
             prob_east = 0
             prob_south = 0
             prob_west = 0
 
             if self.maze.in_bounds(up):
-                sum_denominator += self.maze.pheromones[i - 1][j]
-            if self.maze.in_bounds(right):
                 sum_denominator += self.maze.pheromones[i][j + 1]
-            if self.maze.in_bounds(down):
+            if self.maze.in_bounds(right):
                 sum_denominator += self.maze.pheromones[i + 1][j]
-            if self.maze.in_bounds(left):
+            if self.maze.in_bounds(down):
                 sum_denominator += self.maze.pheromones[i][j - 1]
+            if self.maze.in_bounds(left):
+                sum_denominator += self.maze.pheromones[i - 1][j]
 
             if self.maze.in_bounds(up):
-                prob_north = self.maze.pheromones[i - 1][j] / sum_denominator
+                prob_north = self.maze.pheromones[i][j + 1] / sum_denominator
             if self.maze.in_bounds(right):
-                prob_east = self.maze.pheromones[i][j + 1] / sum_denominator
+                prob_east = self.maze.pheromones[i + 1][j] / sum_denominator
             if self.maze.in_bounds(down):
-                prob_south = self.maze.pheromones[i + 1][j] / sum_denominator
+                prob_south = self.maze.pheromones[i][j - 1] / sum_denominator
             if self.maze.in_bounds(left):
-                prob_west = self.maze.pheromones[i][j - 1] / sum_denominator
+                prob_west = self.maze.pheromones[i - 1][j] / sum_denominator
 
             direction = self.rand.choices([Direction.north, Direction.east, Direction.south, Direction.west],
-                                        [prob_north, prob_east, prob_south, prob_west])
+                                        [prob_north, prob_east, prob_south, prob_west])[0]
 
             route.add(direction)
             current.add_direction(direction)
