@@ -91,31 +91,28 @@ class GeneticAlgorithm:
 
     def _crossover(self, parent_a, parent_b):
         # Perform crossover with 2-point crossover
-        #cut1 = random.randint(0, self.city_count)
-        #cut2 = random.randint(cut1, self.city_count)
+        cut1 = random.randint(0, self.city_count)
+        cut2 = random.randint(cut1, self.city_count)
 
         # Create a child
-        #child = parent_b
+        child = parent_b
         #child2 = [-1] * self.city_count
         #child2 = parent_a
 
         # Copy the middle segment from parent A
-        #child[cut1:cut2] = parent_a[cut1:cut2]
+        child[cut1:cut2] = parent_a[cut1:cut2]
 
         #child2[cut1:cut2 + 1] = parent_b[cut1:cut2]
 
         # Fill the remaining positions with cities from parent B, in order
-        #p_b_index = 0
+        p_b_index = 0
         #for i in range(self.city_count):
         #    if child[i] == -1:
         #        while parent_b[p_b_index] in child:
         #            p_b_index += 1
         #        child[i] = parent_b[p_b_index]
         #        p_b_index += 1
-        #print("Child: ", child)
-        cut = np.random.randint(0, self.city_count)
-        child = parent_a
-        child[0:cut] = parent_b
+        print("Child: ", child)
         return child
 
     def _get_best_route(self):
