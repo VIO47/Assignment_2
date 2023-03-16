@@ -137,10 +137,11 @@ class GeneticAlgorithm:
         return best_route, best_distance
 
     def _get_route_distance(self, route):
-        distance = 0
         distances = self.tsp_data.distances
-        for i in range(len(route)):
+        distance = self.tsp_data.get_start_distances()[route[0]]
+        for i in range(len(route) - 1):
             from_city = route[i]
-            to_city = route[0] if i == len(route) - 1 else route[i + 1]
+            to_city = route[i + 1]
             distance += distances[from_city][to_city]
+        distance += self.tsp_data.get_end_distances()[route[-1]]
         return distance
