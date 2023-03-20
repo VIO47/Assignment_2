@@ -38,20 +38,21 @@ class Maze:
     # @param r The route of the ants
     # @param Q Normalization factor for amount of dropped pheromone
     def add_pheromone_route(self, route):
-        current = route.start
-        if self.walls[current.x][current.y] == 1:
-            new_pheromones = self.get_pheromone(current) + self.get_surrounding_pheromone(current)
-            self.pheromones[current.x][current.y] = new_pheromones
-        else:
-            self.pheromones[current.x][current.y] = 0
-
-        for direction in route.route:
+        if(route is not None):
+            current = route.start
             if self.walls[current.x][current.y] == 1:
-                current = current.add_direction(direction)
                 new_pheromones = self.get_pheromone(current) + self.get_surrounding_pheromone(current)
                 self.pheromones[current.x][current.y] = new_pheromones
             else:
                 self.pheromones[current.x][current.y] = 0
+
+            for direction in route.route:
+                if self.walls[current.x][current.y] == 1:
+                    current = current.add_direction(direction)
+                    new_pheromones = self.get_pheromone(current) + self.get_surrounding_pheromone(current) * (1 / len(route.route))
+                    self.pheromones[current.x][current.y] = new_pheromones
+                else:
+                    self.pheromones[current.x][current.y] = 0
 
 
      # Update pheromones for a list of routes

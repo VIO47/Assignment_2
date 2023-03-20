@@ -1,4 +1,5 @@
 import time
+import numpy as np
 from Maze import Maze
 from PathSpecification import PathSpecification
 from Ant import Ant
@@ -25,17 +26,21 @@ class AntColonyOptimization:
      # @return ACO optimized route
     def find_shortest_route(self, path_specification):
         shortest_route_overall = None
+        smallest_size = np.inf
         self.maze.reset(self.q)
         for i in range(self.generations):
             routes = []
             for j in range(self.ants_per_gen):
                 ant = Ant(self.maze, path_specification)
                 # to do: use timeout instead of 100 iterations
-                route = ant.find_route(100000)
-                if route != None:
+                route = ant.find_route(500000)
+                if route is not None:
                     routes.append(route)  
-                    if route.shorter_than(shortest_route_overall):
+                    if (route.size() < smallest_size):
+                        #route.shorter_than(shortest_route_overall):
                         shortest_route_overall = route
+                        smallest_size = route.size()
+
             self.maze.add_pheromone_routes(routes)
             self.maze.evaporate(self.evaporation)
 

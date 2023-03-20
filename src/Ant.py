@@ -21,13 +21,13 @@ class Ant:
     # @return The route the ant found through the maze.
     def find_route(self, iterations):
         route = Route(self.start)
-        current = self.start
+        #current = self.start
         self.visited.append(self.start)
         it = 0
 
-        while (current.__eq__(self.end) is False) and (it < iterations):
-            i = current.x
-            j = current.y
+        while (self.current_position.__eq__(self.end) is False) and (it < iterations):
+            i = self.current_position.x
+            j = self.current_position.y
 
             sum_denominator = 0
             left = Coordinate(i - 1, j)
@@ -43,28 +43,40 @@ class Ant:
             prob_south = 0
             prob_west = 0
 
-            if self.maze.in_bounds(up) and up not in self.visited and self.maze.walls[up.x][up.y] == 1:
-                sum_denominator += self.maze.pheromones[i][j + 1]
 
-            print(right)
-            if self.maze.in_bounds(right) and right not in self.visited and self.maze.walls[right.x][right.y] == 1:
-                sum_denominator += self.maze.pheromones[i + 1][j]
-            if self.maze.in_bounds(down) and down not in self.visited and self.maze.walls[down.x][down.y] == 1:
-                sum_denominator += self.maze.pheromones[i][j - 1]
-            if self.maze.in_bounds(left) and left not in self.visited and self.maze.walls[left.x][left.y] == 1:
-                sum_denominator += self.maze.pheromones[i - 1][j]
+            check_south = False
+            check_north = False
+            check_east = False
+            check_west = False
 
-            #print(sum_denominator)
-            if (sum_denominator == 0):
+            if self.maze.in_bounds(up) and self.maze.walls[up.x][up.y] == 1 and up not in self.visited:
+                check_north = True
+            if self.maze.in_bounds(right) and self.maze.walls[right.x][right.y] == 1 and right not in self.visited:
+                check_east = True
+            if self.maze.in_bounds(down) and self.maze.walls[down.x][down.y] == 1 and down not in self.visited:
+                check_south = True
+            if self.maze.in_bounds(left) and self.maze.walls[left.x][left.y] == 1 and left not in self.visited:
+                check_west = True
+
+            if(check_east == check_west == check_south == check_north == False):
                 return None
 
-            if self.maze.in_bounds(up) and up not in self.visited and self.maze.walls[up.x][up.y] == 1:
-                prob_north = self.maze.pheromones[i][j + 1] / sum_denominator
-            if self.maze.in_bounds(right) and right not in self.visited and self.maze.walls[right.x][right.y] == 1:
+            if check_north:
+                sum_denominator += self.maze.pheromones[i][j - 1]
+            if check_east:
+                sum_denominator += self.maze.pheromones[i + 1][j]
+            if check_south:
+                sum_denominator += self.maze.pheromones[i][j + 1]
+            if check_west:
+                sum_denominator += self.maze.pheromones[i - 1][j]
+
+            if check_north:
+                prob_north = self.maze.pheromones[i][j - 1] / sum_denominator
+            if check_east:
                 prob_east = self.maze.pheromones[i + 1][j] / sum_denominator
-            if self.maze.in_bounds(down) and down not in self.visited and self.maze.walls[down.x][down.y] == 1:
-                prob_south = self.maze.pheromones[i][j - 1] / sum_denominator
-            if self.maze.in_bounds(left) and left not in self.visited and self.maze.walls[left.x][left.y] == 1:
+            if check_south:
+                prob_south = self.maze.pheromones[i][j + 1] / sum_denominator
+            if check_west:
                 prob_west = self.maze.pheromones[i - 1][j] / sum_denominator
 
             direction = self.rand.choices([Direction.north, Direction.east, Direction.south, Direction.west],
@@ -84,11 +96,11 @@ class Ant:
             if (direction == Direction.west):
                 self.visited.append(left)
 
-            print(direction)
             route.add(direction)
-            current.add_direction(direction)
-            if current.__eq__(self.end):
-                print(route)
+            self.current_position = self.current_position.add_direction(direction)
+            print(self.current_position)
+            if self.current_position.__eq__(self.end):
+                #print(route)
                 return route
             it += 1
 
