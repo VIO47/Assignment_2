@@ -21,7 +21,6 @@ class Ant:
     # @return The route the ant found through the maze.
     def find_route(self, iterations):
         route = Route(self.start)
-        #current = self.start
         self.visited.add(self.start)
         it = 0
 
@@ -46,43 +45,50 @@ class Ant:
             check_east = False
             check_west = False
 
+            pheromone_north = 0
+            pheromone_east = 0
+            pheromone_south = 0
+            pheromone_west = 0
+
             if self.maze.in_bounds(up) and self.maze.walls[up.x][up.y] == 1 and up not in self.visited:
                 check_north = True
+                pheromone_north = self.maze.pheromones[i][j - 1]
+                if up in self.visited:
+                    pheromone_north = pheromone_north * 0.5
+                sum_denominator += pheromone_north
             if self.maze.in_bounds(right) and self.maze.walls[right.x][right.y] == 1 and right not in self.visited:
                 check_east = True
+                pheromone_east = self.maze.pheromones[i + 1][j]
+                if right in self.visited:
+                    pheromone_east = pheromone_east * 0.5
+                sum_denominator += pheromone_east
             if self.maze.in_bounds(down) and self.maze.walls[down.x][down.y] == 1 and down not in self.visited:
                 check_south = True
+                pheromone_south = self.maze.pheromones[i][j + 1]
+                if down in self.visited:
+                    pheromone_south = pheromone_south * 0.5
+                sum_denominator += pheromone_south
             if self.maze.in_bounds(left) and self.maze.walls[left.x][left.y] == 1 and left not in self.visited:
                 check_west = True
+                pheromone_west = self.maze.pheromones[i - 1][j]
+                if left in self.visited:
+                    pheromone_west = pheromone_west * 0.5
+                sum_denominator += pheromone_west
 
             if(check_east == check_west == check_south == check_north == False):
                 return None
 
             if check_north:
-                sum_denominator += self.maze.pheromones[i][j - 1]
+                prob_north = pheromone_north / sum_denominator
             if check_east:
-                sum_denominator += self.maze.pheromones[i + 1][j]
+                prob_east = pheromone_east / sum_denominator
             if check_south:
-                sum_denominator += self.maze.pheromones[i][j + 1]
+                prob_south = pheromone_south / sum_denominator
             if check_west:
-                sum_denominator += self.maze.pheromones[i - 1][j]
-
-            if check_north:
-                prob_north = self.maze.pheromones[i][j - 1] / sum_denominator
-            if check_east:
-                prob_east = self.maze.pheromones[i + 1][j] / sum_denominator
-            if check_south:
-                prob_south = self.maze.pheromones[i][j + 1] / sum_denominator
-            if check_west:
-                prob_west = self.maze.pheromones[i - 1][j] / sum_denominator
+                prob_west = pheromone_west / sum_denominator
 
             direction = self.rand.choices([Direction.north, Direction.east, Direction.south, Direction.west],
                                         [prob_north, prob_east, prob_south, prob_west])[0]
-
-            #while(direction not in visited):
-             #   direction = self.rand.choices([Direction.north, Direction.east, Direction.south, Direction.west],
-              #                                [prob_north, prob_east, prob_south, prob_west])[0]
-              #  iterations += 1
 
             if (direction == Direction.north):
                 self.visited.add(up)

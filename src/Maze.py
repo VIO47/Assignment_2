@@ -37,20 +37,13 @@ class Maze:
     # Update the pheromones along a certain route according to a certain Q
     # @param r The route of the ants
     # @param Q Normalization factor for amount of dropped pheromone
-    def add_pheromone_route(self, route):
+    def add_pheromone_route(self, route, q):
         if(route is not None):
             current = route.start
-            if self.walls[current.x][current.y] == 1:
-                new_pheromones = self.get_pheromone(current) + self.get_surrounding_pheromone(current)
-                self.pheromones[current.x][current.y] = new_pheromones
-            else:
-                self.pheromones[current.x][current.y] = 0
-
-            for direction in route.route:
-                if self.walls[current.x][current.y] == 1:
-                    current = current.add_direction(direction)
-                    new_pheromones = self.get_pheromone(current) + self.get_surrounding_pheromone(current) * (1 / len(route.route))
-                    self.pheromones[current.x][current.y] = new_pheromones
+            for coord in route.route:
+                current = current.add_direction(coord)
+                if(self.walls[current.x][current.y] == 1):
+                    self.pheromones[current.x][current.y] += q / len(route.route)
                 else:
                     self.pheromones[current.x][current.y] = 0
 
@@ -58,9 +51,9 @@ class Maze:
      # Update pheromones for a list of routes
      # @param routes A list of routes
      # @param Q Normalization factor for amount of dropped pheromone
-    def add_pheromone_routes(self, routes):
+    def add_pheromone_routes(self, routes, q):
         for r in routes:
-            self.add_pheromone_route(r)
+            self.add_pheromone_route(r, q)
 
     # Evaporate pheromone
     # @param rho evaporation factor
