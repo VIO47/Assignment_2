@@ -15,14 +15,14 @@ class Ant:
         self.end = path_specification.get_end()
         self.current_position = self.start
         self.rand = random
-        self.visited = []
+        self.visited = set()
 
     # Method that performs a single run through the maze by the ant.
     # @return The route the ant found through the maze.
     def find_route(self, iterations):
         route = Route(self.start)
         #current = self.start
-        self.visited.append(self.start)
+        self.visited.add(self.start)
         it = 0
 
         while (self.current_position.__eq__(self.end) is False) and (it < iterations):
@@ -30,19 +30,16 @@ class Ant:
             j = self.current_position.y
 
             sum_denominator = 0
+
             left = Coordinate(i - 1, j)
             up = Coordinate(i, j - 1)
             right = Coordinate(i + 1, j)
             down = Coordinate(i, j + 1)
-            #left = Coordinate(i, j - 1)
-            #up = Coordinate(i - 1, j)
-            #right = Coordinate(i, j + 1)
-            #down = Coordinate(i + 1, j)
+
             prob_north = 0
             prob_east = 0
             prob_south = 0
             prob_west = 0
-
 
             check_south = False
             check_north = False
@@ -88,13 +85,13 @@ class Ant:
               #  iterations += 1
 
             if (direction == Direction.north):
-                self.visited.append(up)
+                self.visited.add(up)
             if (direction == Direction.south):
-                self.visited.append(down)
+                self.visited.add(down)
             if (direction == Direction.east):
-                self.visited.append(right)
+                self.visited.add(right)
             if (direction == Direction.west):
-                self.visited.append(left)
+                self.visited.add(left)
 
             route.add(direction)
             self.current_position = self.current_position.add_direction(direction)
