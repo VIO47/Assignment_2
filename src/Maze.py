@@ -54,6 +54,10 @@ class Maze:
             #     else:
             #         self.pheromones[current.x][current.y] = 0
             current = route.start
+            if(self.walls[current.x][current.y] == 1):
+                self.pheromones[current.x][current.y] += q / len(route.route)
+            else:
+                self.pheromones[current.x][current.y] = 0
             for coord in route.route:
                 current = current.add_direction(coord)
                 if(self.walls[current.x][current.y] == 1):
