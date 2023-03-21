@@ -15,14 +15,14 @@ class Ant:
         self.end = path_specification.get_end()
         self.current_position = self.start
         self.rand = random
-        self.visited = []
+        self.visited = set()
 
     # Method that performs a single run through the maze by the ant.
     # @return The route the ant found through the maze.
     def find_route(self, iterations):
         route = Route(self.start)
         #current = self.start
-        self.visited.append(self.start)
+        self.visited.add(self.start)
         it = 0
 
         while (self.current_position.__eq__(self.end) is False) and (it < iterations):
@@ -42,6 +42,10 @@ class Ant:
             prob_east = 0
             prob_south = 0
             prob_west = 0
+            pheromone_north = 0
+            pheromone_east = 0
+            pheromone_south = 0
+            pheromone_west = 0
 
 
             check_south = False
@@ -49,35 +53,47 @@ class Ant:
             check_east = False
             check_west = False
 
-            if self.maze.in_bounds(up) and self.maze.walls[up.x][up.y] == 1 and up not in self.visited:
+            if self.maze.in_bounds(up) and self.maze.walls[up.x][up.y] == 1:
                 check_north = True
-            if self.maze.in_bounds(right) and self.maze.walls[right.x][right.y] == 1 and right not in self.visited:
+            if self.maze.in_bounds(right) and self.maze.walls[right.x][right.y] == 1:
                 check_east = True
-            if self.maze.in_bounds(down) and self.maze.walls[down.x][down.y] == 1 and down not in self.visited:
+            if self.maze.in_bounds(down) and self.maze.walls[down.x][down.y] == 1:
                 check_south = True
-            if self.maze.in_bounds(left) and self.maze.walls[left.x][left.y] == 1 and left not in self.visited:
+            if self.maze.in_bounds(left) and self.maze.walls[left.x][left.y] == 1 and left:
                 check_west = True
 
             if(check_east == check_west == check_south == check_north == False):
                 return None
 
             if check_north:
-                sum_denominator += self.maze.pheromones[i][j - 1]
+                pheromone_north = self.maze.pheromones[i][j - 1]
+                if up in self.visited:
+                    pheromone_north = pheromone_north * 0.5
+                sum_denominator += pheromone_north
             if check_east:
-                sum_denominator += self.maze.pheromones[i + 1][j]
+                pheromone_east = self.maze.pheromones[i + 1][j]
+                if right in self.visited:
+                    pheromone_east = pheromone_east * 0.5
+                sum_denominator += pheromone_east
             if check_south:
-                sum_denominator += self.maze.pheromones[i][j + 1]
+                pheromone_south = self.maze.pheromones[i][j + 1]
+                if down in self.visited:
+                    pheromone_south = pheromone_south * 0.5
+                sum_denominator += pheromone_south
             if check_west:
-                sum_denominator += self.maze.pheromones[i - 1][j]
+                pheromone_west = self.maze.pheromones[i - 1][j]
+                if left in self.visited:
+                    pheromone_west = pheromone_west * 0.5
+                sum_denominator += pheromone_west
 
             if check_north:
-                prob_north = self.maze.pheromones[i][j - 1] / sum_denominator
+                prob_north = pheromone_north / sum_denominator
             if check_east:
-                prob_east = self.maze.pheromones[i + 1][j] / sum_denominator
+                prob_east = pheromone_east / sum_denominator
             if check_south:
-                prob_south = self.maze.pheromones[i][j + 1] / sum_denominator
+                prob_south = pheromone_south/ sum_denominator
             if check_west:
-                prob_west = self.maze.pheromones[i - 1][j] / sum_denominator
+                prob_west = pheromone_west/ sum_denominator
 
             direction = self.rand.choices([Direction.north, Direction.east, Direction.south, Direction.west],
                                         [prob_north, prob_east, prob_south, prob_west])[0]
@@ -88,19 +104,19 @@ class Ant:
               #  iterations += 1
 
             if (direction == Direction.north):
-                self.visited.append(up)
+                self.visited.add(up)
             if (direction == Direction.south):
-                self.visited.append(down)
+                self.visited.add(down)
             if (direction == Direction.east):
-                self.visited.append(right)
+                self.visited.add(right)
             if (direction == Direction.west):
-                self.visited.append(left)
+                self.visited.add(left)
 
             route.add(direction)
             self.current_position = self.current_position.add_direction(direction)
-            print(self.current_position)
             if self.current_position.__eq__(self.end):
-                #print(route)
+                print("Found route")
+                print(len(route.get_route()))
                 return route
             it += 1
 

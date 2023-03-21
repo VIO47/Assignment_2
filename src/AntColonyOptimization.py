@@ -33,7 +33,7 @@ class AntColonyOptimization:
             for j in range(self.ants_per_gen):
                 ant = Ant(self.maze, path_specification)
                 # to do: use timeout instead of 100 iterations
-                route = ant.find_route(500000)
+                route = ant.find_route(10000000)
                 if route is not None:
                     routes.append(route)  
                     if (route.size() < smallest_size):
@@ -41,7 +41,11 @@ class AntColonyOptimization:
                         shortest_route_overall = route
                         smallest_size = route.size()
 
-            self.maze.add_pheromone_routes(routes)
             self.maze.evaporate(self.evaporation)
+         #   print(self.maze.pheromones)
+            self.maze.add_pheromone_routes(routes, self.q)
+          #  print(0)
+          #  print(self.maze.pheromones)
+
 
         return shortest_route_overall
